@@ -50,8 +50,10 @@ function getWeatherDescription(wmoCode:number): string {
 }
 
 export async function getWeather(args: WeatherArgs) {
-  const { city, country } = args;
+  
+	const { city, country } = args;
 	const coords = cityCoordinates[city];
+
 	if (!coords) {
 		return {}
 		content: [{
@@ -67,7 +69,6 @@ export async function getWeather(args: WeatherArgs) {
 				{ date: '2023-10-03', temperature: 19, description: 'Rainy' }
 			]
 		}];
-	}
 	}
 
 	try {
