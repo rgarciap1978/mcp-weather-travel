@@ -6,7 +6,7 @@ import {
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { getWeather } from "./tools/weather";
+import { getWeather } from "./tools/weather.js";
 
 const server = new Server(
   {
@@ -23,6 +23,7 @@ const server = new Server(
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
+    console.log("🛠️ ListTools request received");
   return {
     tools: [{
         name: 'get_weather',
@@ -67,7 +68,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.log("Server started. Waiting for requests...");
+  //console.log("Server started. Waiting for requests...");
 }
 
 main().catch((error) => {
