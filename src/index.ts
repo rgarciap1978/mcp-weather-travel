@@ -7,6 +7,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { getWeather } from "./tools/weather.js";
+import { searchFlight } from "./tools/flight.js";
 
 const server = new Server(
   {
@@ -25,7 +26,8 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     console.log("🛠️ ListTools request received");
   return {
-    tools: [{
+    tools: [
+      {
         name: 'get_weather',
         description: 'Get current weather and forecast for a city',
         inputSchema: {
@@ -36,7 +38,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ['city']
         }
-    }],
+      },
+      {
+        name: 'search_flights',
+        description: 'Search for avaliable flight between two cities',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            from: {
+              type: 'string',
+              description: 'Deaprture city'
+            },
+            to: {
+              type: 'string',
+              description: 'Destination city'
+            },
+            date: {
+              type: 'string',
+              description: 'Departure date (YYYY-MM-DD)'
+            }
+          },
+          required: ['from','to','date']
+        }
+      }
+    ],
   };
 });
 
@@ -60,6 +85,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (name) {
         case 'get_weather':
             return await getWeather(args as any);
+        case 'search_flight':
+          return await searchFlight(args as any);
         default:
             throw new Error(`Tool ${name} not found`);
     }
