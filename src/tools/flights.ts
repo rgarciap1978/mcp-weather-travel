@@ -1,12 +1,12 @@
-import { resolve } from "path";
+import { getAirportsResource } from "../resources/index.js";
 
 interface FlightArgs {
-    from: string,
-    to: string,
-    date: string
+    from: string;
+    to: string;
+    date: string;
 }
 
-interface Flight {
+interface Flights {
     airline: string,
     flightNumber: string,
     departure: string,
@@ -15,10 +15,10 @@ interface Flight {
     duration: string
 }
 
-export async function searchFlight(args:FlightArgs) {
+export async function searchFlights(args:FlightArgs) {
     const { from, to, date } = args;
 
-    const mockFlights: Flight[] = [
+    const mockFlights: Flights[] = [
       {
         airline: 'LATAM',
         flightNumber: 'LTM1234',

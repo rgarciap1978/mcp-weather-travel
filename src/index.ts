@@ -5,9 +5,11 @@ import {
   ListPromptsRequestSchema,
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
+  ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { getWeather } from "./tools/weather.js";
-import { searchFlight } from "./tools/flight.js";
+import { searchFlights } from "./tools/flights.js";
+import { getAirportsResource } from "./resources/index.js";
 
 const server = new Server(
   {
@@ -24,30 +26,34 @@ const server = new Server(
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-    console.log("🛠️ ListTools request received");
-  return {
-    tools: [
+  return { tools: [
       {
         name: 'get_weather',
-        description: 'Get current weather and forecast for a city',
+        description: 'Gets current weather and forecast for a specific city',
         inputSchema: {
           type: 'object',
           properties: {
-            city: { type: 'string', description: 'City name' },
-            country: { type: 'string', description: 'Country code (optional)' },
+            city: { 
+              type: 'string', 
+              description: 'City name' 
+            },
+            country: { 
+              type: 'string', 
+              description: 'Country code (optional)' 
+            }
           },
           required: ['city']
         }
       },
       {
         name: 'search_flights',
-        description: 'Search for avaliable flight between two cities',
+        description: 'Search for available flights between two cities',
         inputSchema: {
           type: 'object',
           properties: {
             from: {
               type: 'string',
-              description: 'Deaprture city'
+              description: 'Departure city'
             },
             to: {
               type: 'string',
@@ -61,14 +67,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['from','to','date']
         }
       }
-    ],
-  };
+    ] };
 });
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  return {
-    resources: [],
-  };
+  return { resources: [
+    { uri: 'airports', mimeType: 'application/json', name: 'Airports Database', description: 'List of available airports in Chile' }
+  ] };
 });
 
 server.setRequestHandler(ListPromptsRequestSchema, async () => {
@@ -79,17 +84,24 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, args } = request.params;
-
-    if(!args) throw new Error("Tool name is required");
+    if(!args) throw new Error("Arguments are required");
 
     switch (name) {
         case 'get_weather':
             return await getWeather(args as any);
         case 'search_flight':
-          return await searchFlight(args as any);
+          return await searchFlights(args as any);
         default:
             throw new Error(`Tool ${name} not found`);
     }
+});
+
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const { uri } = request.params;
+  switch(uri){ 
+    case 'airports': return await getAirportsResource();
+    default: throw new Error(`Unknow resource: ${uri}`);
+  }
 });
 
 async function main(): Promise<void> {
@@ -98,7 +110,7 @@ async function main(): Promise<void> {
   //console.log("Server started. Waiting for requests...");
 }
 
-main().catch((error) => {
+main().catch((error: Error) => {
   console.error("Error starting server:", error);
   process.exit(1);
 }); 
